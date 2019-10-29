@@ -26,6 +26,18 @@ var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READONLY, (err) => {
 
 app.use(express.static(public_dir));
 
+app.get('/coal_count', (req, res) => {
+    var total = 0;
+    db.all("SELECT coal FROM Consumption WHERE year = ?", ["2017"], (err, rows) => {
+        
+        for (var i = 0; i < rows.length; i++) 
+        {
+            total = total + rows[i].coal;
+        }
+        //show_results(total);
+        res.send(total.toString());
+    });
+});
 
 
 // GET request handler for '/'
@@ -169,11 +181,7 @@ app.get('/state/:selected_state', (req, res) => {
     ReadFile(path.join(template_dir, 'state.html')).then((template) => {
         let response = template;
         // modify `response` here
-        var total_coal = [];
-        var total_natural_gas = [];
-        var total_nuclear_count = [];
-        var total_petroleum_count = [];
-        var total_renewable_count = [];
+        
         var state_Chosen = '';
         state_Chosen = req.params.selected_state;
         state_Chosen = state_Chosen.toString();
@@ -183,7 +191,61 @@ app.get('/state/:selected_state', (req, res) => {
         response = response.replace('<h2>Yearly Snapshot</h2>', '<h2>' + state_Chosen + ' Yearly Snapshot' + '</h2>');
 
         response = response.replace('var state', 'var state = ' +  "'" + state_Chosen + "'");
-        WriteHtml(res, response);
+        db.all('SELECT * FROM Consumption WHERE state_abbreviation = ?', [state_Chosen], (err, rows) => {
+            var total_coal = [];
+            var total_natural_gas = [];
+            var total_nuclear_count = [];
+            var total_petroleum_count = [];
+            var total_renewable_count = [];
+            for (var i = 0; i < rows.length; i++) 
+            {
+                total_coal[i] = rows[i].coal;
+                total_natural_gas[i] = rows[i].natural_gas;
+                total_nuclear_count[i] = rows[i].nuclear;
+                total_petroleum_count[i] = rows[i].petroleum;
+                total_renewable_count[i] = rows[i].renewable;
+            }
+            //console.log(total_coal)
+            response = response.replace('var coal_counts', 'var coal_counts = ' + '[' + total_coal + ']');
+            response = response.replace('var natural_gas_counts', 'var natural_gas_counts = ' + '[' + total_natural_gas.toString() + ']');
+            response = response.replace('var nuclear_counts', 'var nuclear_counts = ' + '[' + total_nuclear_count.toString() + ']');
+            response = response.replace('var petroleum_counts', 'var petroleum_counts = ' + '[' + total_petroleum_count.toString() + ']');
+            response = response.replace('var renewable_counts', 'var renewable_counts = ' + '[' + total_renewable_count.toString() + ']');
+            db.all('SELECT * FROM Consumption WHERE state_abbreviation = ?', [state_Chosen], (err, rows) => {
+                var coalData = '';
+                var gasData = '';
+                var nuclearData = '';
+                var petroleumData = '';
+                var renewableData = '';
+                var totalRow = '';
+
+                var tableResult = '';
+                for(var i = 0; i < rows.length; i++)
+                {
+                    coalData = rows[i].coal;
+                    coalData = coalData.toString();
+                    gasData = rows[i].natural_gas;
+                    gasData = gasData.toString();
+                    nuclearData = rows[i].nuclear;
+                    nuclearData = nuclearData.toString();
+                    petroleumData = rows[i].petroleum;
+                    petroleumData = petroleumData.toString();
+                    renewableData = rows[i].renewable;
+                    renewableData = renewableData.toString();
+                    var totalRowValue = Math.round(coalData + gasData + nuclearData + petroleumData + renewableData);
+                    totalRow = totalRowValue.toString();
+
+                    tableResult = tableResult + '<tr><td>' + rows[i].year + '</td>' + '\n' + '<td>' + coalData + '</td>' +
+                                '\n' + '<td>' + gasData + '</td>' + '\n' + '<td>' + nuclearData + '</td>' + '\n' + '<td>' +
+                                petroleumData + '</td>' + '\n' + '<td>' + renewableData + '\n' + '<td>' + totalRow +'</td>';
+                }
+                response = response.replace('<td>tableData</td>', tableResult);
+
+                WriteHtml(res, response);
+            });
+            
+        });
+        
     }).catch((err) => {
         Write404Error(res);
     });
