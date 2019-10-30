@@ -191,7 +191,7 @@ app.get('/state/:selected_state', (req, res) => {
         response = response.replace('<h2>Yearly Snapshot</h2>', '<h2>' + state_Chosen + ' Yearly Snapshot' + '</h2>');
 
         response = response.replace('var state', 'var state = ' +  "'" + state_Chosen + "'");
-        db.all('SELECT * FROM Consumption WHERE state_abbreviation = ?', [state_Chosen], (err, rows) => {
+        db.all('SELECT * FROM Consumption WHERE state_abbreviation = ? ORDER BY year', [state_Chosen], (err, rows) => {
             var total_coal = [];
             var total_natural_gas = [];
             var total_nuclear_count = [];
@@ -255,8 +255,53 @@ app.get('/state/:selected_state', (req, res) => {
 app.get('/energy-type/:selected_energy_type', (req, res) => {
     ReadFile(path.join(template_dir, 'energy.html')).then((template) => {
         let response = template;
+
+        var energyTypeSelected = '';
+        energyTypeSelected = req.params.selected_energy_type;
+        energyTypeSelected = energyTypeSelected.toString();
         // modify `response` here
-        WriteHtml(res, response);
+
+        response = response.replace('var energy_type', 'var energy_type = ' + "'" + energyTypeSelected + "'");
+
+        //populate header
+        response = response.replace('<h2>Consumption Snapshot</h2>', '<h2>' +  energyTypeSelected  + ' Consumption Snapshot</h2>');
+
+        // for each state, loop thru all years and get selected coal type
+        //object will have name:value PerformanceObserverEntryList, name is state_abbreviation value is array of energytype
+
+        db.all('SELECT * FROM Consumption ORDER BY state_abbreviation,year', (err, rows) => {
+            var stateKey = '';
+		    var energyObj = {};
+                
+            // loop through each state
+            var i = 0;
+            while(i < rows.length)
+		    {
+                stateKey = rows[i].state_abbreviation;
+                let energyValue = [];
+                // loop through energy source from 1960 - 2017
+                var currentState = stateKey;
+                while(currentState === stateKey) 
+			    {
+                    energyValue.push(rows[i][energyTypeSelected]);
+                    i++;
+                    if(i < rows.length)
+                    {
+                        currentState = rows[i].state_abbreviation;
+                    }
+                    else
+                    {
+                        currentState = '';
+                    }
+			    }
+			    // here is where we push our array of energy to the value (key-value)
+			    energyObj[stateKey] = energyValue;
+            }
+		    energyObj = JSON.stringify(energyObj);
+		    console.log(energyObj);
+            response = response.replace('var energy_counts', 'var energy_counts = ' + energyObj);
+            WriteHtml(res, response);
+        })    
     }).catch((err) => {
         Write404Error(res);
     });
