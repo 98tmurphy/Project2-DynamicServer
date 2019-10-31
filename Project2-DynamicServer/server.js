@@ -191,61 +191,52 @@ app.get('/state/:selected_state', (req, res) => {
         response = response.replace('<h2>Yearly Snapshot</h2>', '<h2>' + state_Chosen + ' Yearly Snapshot' + '</h2>');
 
         response = response.replace('var state', 'var state = ' +  "'" + state_Chosen + "'");
-        db.all('SELECT * FROM Consumption WHERE state_abbreviation = ? ORDER BY year', [state_Chosen], (err, rows) => {
+
+        db.all('SELECT * FROM Consumption ORDER BY year', (err, rows) => {
             var total_coal = [];
             var total_natural_gas = [];
             var total_nuclear_count = [];
             var total_petroleum_count = [];
             var total_renewable_count = [];
-            for (var i = 0; i < rows.length; i++) 
+            var tableResult = '';
+            var totalRow = 0;
+        
+            // get the state
+            var stateIteration = '';
+            stateIteration = rows[0].state_abbreviation;
+            var j = 0;
+            while(state_Chosen != stateIteration)
             {
-                total_coal[i] = rows[i].coal;
-                total_natural_gas[i] = rows[i].natural_gas;
-                total_nuclear_count[i] = rows[i].nuclear;
-                total_petroleum_count[i] = rows[i].petroleum;
-                total_renewable_count[i] = rows[i].renewable;
+                j++;
+                stateIteration = rows[j].state_abbreviation;
             }
-            //console.log(total_coal)
+        
+            var i = j;
+            while(i < rows.length)
+            {
+                totalRow = Math.round(rows[i].coal + rows[i].natural_gas + rows[i].nuclear + rows[i].petroleum + rows[i].renewable);
+                tableResult = tableResult + '<tr><td>' + rows[i].year + '</td>' + '\n' + '<td>' + rows[i].coal + '</td>' +
+                                 '\n' + '<td>' + rows[i].natural_gas + '</td>' + '\n' + '<td>' + rows[i].nuclear + '</td>' + '\n' + '<td>' +
+                                 rows[i].petroleum + '</td>' + '\n' + '<td>' + rows[i].renewable + '\n' + '<td>' + totalRow +'</td>';
+                total_coal.push(rows[i].coal);
+                total_natural_gas.push(rows[i].natural_gas);
+                total_nuclear_count.push(rows[i].natural_gas);
+                total_petroleum_count.push(rows[i].petroleum);
+                total_renewable_count.push(rows[i].renewable);
+                i = i + 51;
+                //console.log(dataResult)
+            }
+
             response = response.replace('var coal_counts', 'var coal_counts = ' + '[' + total_coal + ']');
             response = response.replace('var natural_gas_counts', 'var natural_gas_counts = ' + '[' + total_natural_gas.toString() + ']');
             response = response.replace('var nuclear_counts', 'var nuclear_counts = ' + '[' + total_nuclear_count.toString() + ']');
             response = response.replace('var petroleum_counts', 'var petroleum_counts = ' + '[' + total_petroleum_count.toString() + ']');
             response = response.replace('var renewable_counts', 'var renewable_counts = ' + '[' + total_renewable_count.toString() + ']');
-            db.all('SELECT * FROM Consumption WHERE state_abbreviation = ?', [state_Chosen], (err, rows) => {
-                var coalData = '';
-                var gasData = '';
-                var nuclearData = '';
-                var petroleumData = '';
-                var renewableData = '';
-                var totalRow = '';
 
-                var tableResult = '';
-                for(var i = 0; i < rows.length; i++)
-                {
-                    coalData = rows[i].coal;
-                    coalData = coalData.toString();
-                    gasData = rows[i].natural_gas;
-                    gasData = gasData.toString();
-                    nuclearData = rows[i].nuclear;
-                    nuclearData = nuclearData.toString();
-                    petroleumData = rows[i].petroleum;
-                    petroleumData = petroleumData.toString();
-                    renewableData = rows[i].renewable;
-                    renewableData = renewableData.toString();
-                    var totalRowValue = Math.round(coalData + gasData + nuclearData + petroleumData + renewableData);
-                    totalRow = totalRowValue.toString();
-
-                    tableResult = tableResult + '<tr><td>' + rows[i].year + '</td>' + '\n' + '<td>' + coalData + '</td>' +
-                                '\n' + '<td>' + gasData + '</td>' + '\n' + '<td>' + nuclearData + '</td>' + '\n' + '<td>' +
-                                petroleumData + '</td>' + '\n' + '<td>' + renewableData + '\n' + '<td>' + totalRow +'</td>';
-                }
-                response = response.replace('<td>tableData</td>', tableResult);
-
-                WriteHtml(res, response);
-            });
-            
-        });
-        
+            response = response.replace('<td>tableData</td>', tableResult)
+            console.log(total_coal);
+            WriteHtml(res, response);
+        });        
     }).catch((err) => {
         Write404Error(res);
     });
@@ -305,7 +296,8 @@ app.get('/energy-type/:selected_energy_type', (req, res) => {
 				var yearIndex = 1960;
 				var dataResult = '';
 				var stateIndex;
-				var data = 0;
+                var data = 0;
+                var totalRow = 0;
 				var i = 0;
 				var j = 0;
 				while(i < rows.length-2900)
@@ -319,11 +311,13 @@ app.get('/energy-type/:selected_energy_type', (req, res) => {
 						 data = rows[j][energyTypeSelected];
                          //console.log(data)
                          dataResult += '<td>' + data + '</td>';
+                         totalRow += data;
 						 j += 58;
 						 counter++;
 					 }
                      i++;
-                     dataResult += '</tr>' + '\n';
+                     dataResult += '<td>' + totalRow + '</td></tr>' + '\n';
+                     totalRow = 0;
 					//console.log(dataResult)
                 }
                 response = response.replace('<td>dataTable</td>', dataResult);
