@@ -300,7 +300,35 @@ app.get('/energy-type/:selected_energy_type', (req, res) => {
 		    energyObj = JSON.stringify(energyObj);
 		    console.log(energyObj);
             response = response.replace('var energy_counts', 'var energy_counts = ' + energyObj);
-            WriteHtml(res, response);
+
+            db.all('SELECT * FROM Consumption ORDER by state_abbreviation, year', (err, rows) => {
+				var yearIndex = 1960;
+				var dataResult = '';
+				var stateIndex;
+				var data = 0;
+				var i = 0;
+				var j = 0;
+				while(i < rows.length-2900)
+				{
+					console.log(rows[i].year)
+					 dataResult += '<tr><td>' + rows[i].year + '</td>';
+					 j = i;
+					 var counter = 0;
+					 while(counter < 51)
+					 {
+						 data = rows[j].coal;
+                         //console.log(data)
+                         dataResult += '<td>' + data + '</td>';
+						 j += 58;
+						 counter++;
+					 }
+                     i++;
+                     dataResult += '</tr>' + '\n';
+					//console.log(dataResult)
+                }
+                response = response.replace('<td>dataTable</td>', dataResult);
+                WriteHtml(res, response);
+			});		         
         })    
     }).catch((err) => {
         Write404Error(res);
