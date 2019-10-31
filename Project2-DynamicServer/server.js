@@ -316,7 +316,7 @@ app.get('/energy-type/:selected_energy_type', (req, res) => {
 					 var counter = 0;
 					 while(counter < 51)
 					 {
-						 data = rows[j].coal;
+						 data = rows[j][energyTypeSelected];
                          //console.log(data)
                          dataResult += '<td>' + data + '</td>';
 						 j += 58;
