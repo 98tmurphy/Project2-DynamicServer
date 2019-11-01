@@ -165,6 +165,21 @@ app.get('/year/:selected_year', (req, res) => {
                                 petroleumData + '</td>' + '\n' + '<td>' + renewableData + '\n' + '<td>' + totalRow +'</td>';
                 }
                 response = response.replace('<td>tableData</td>', tableResult);
+                if (yearSelected == 1960)
+                 {
+                    response = response.replace("href=\x22\x22>Next</a>", "href=\x22/year/1961\x22>Next</a>");
+                    response = response.replace("href=\x22\x22>Prev</a>", "href=\x22/year/1960\x22>Prev</a>");
+                } 
+                else if (yearSelected == 2017) 
+                {
+                    response = response.replace("href=\x22\x22>Prev</a>", "href=\x22/year/2016\x22>Prev</a>");
+                    response = response.replace("href=\x22\x22>Next</a>", "href=\x22/year/2017\x22>Next</a>");
+        
+                } else 
+                {
+                    response = response.replace("href=\x22\x22>Prev</a>", "href=\x22/year/" + (parseInt(yearSelected)-1) +"\x22>Prev</a>");
+                    response = response.replace("href=\x22\x22>Next</a>", "href=\x22/year/" + (parseInt(yearSelected)+1) +"\x22>Next</a>");
+                }
                 WriteHtml(res, response);
             });
         });
@@ -235,6 +250,23 @@ app.get('/state/:selected_state', (req, res) => {
 
             response = response.replace('<td>tableData</td>', tableResult)
             console.log(total_coal);
+            if (state_Chosen == 'AK')
+            {
+                response = response.replace("href=\x22\x22>Next</a>", "href=\x22/state/AL\x22>Next</a>");
+                response = response.replace("href=\x22\x22>Prev</a>", "href=\x22/state/WY\x22>Prev</a>");
+            } 
+            else if (state_Chosen == 'WY') 
+            {
+                response = response.replace("href=\x22\x22>Prev</a>", "href=\x22/state/WV\x22>Prev</a>");
+                response = response.replace("href=\x22\x22>Next</a>", "href=\x22/state/AK\x22>Next</a>");
+        
+            } 
+            else 
+            {
+                
+                response = response.replace("href=\x22\x22>Prev</a>", "href=\x22/state/" + rows[j-1].state_abbreviation +"\x22>Prev</a>");
+                response = response.replace("href=\x22\x22>Next</a>", "href=\x22/state/" + rows[j+1].state_abbreviation +"\x22>Next</a>");
+            }
             WriteHtml(res, response);
         });        
     }).catch((err) => {
@@ -356,4 +388,3 @@ function WriteHtml(res, html) {
 
 
 var server = app.listen(port);
-
