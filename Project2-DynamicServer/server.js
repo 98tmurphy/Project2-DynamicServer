@@ -353,7 +353,40 @@ app.get('/energy-type/:selected_energy_type', (req, res) => {
 					//console.log(dataResult)
                 }
                 response = response.replace('<td>dataTable</td>', dataResult);
-                WriteHtml(res, response);
+
+                db.get('SELECT coal, natural_gas, nuclear, petroleum, renewable FROM Consumption', (err, rows) => {
+                    
+                    if (energyTypeSelected == 'coal')
+                    {
+                        response = response.replace("href=\x22\x22>Next</a>", "href=\x22/energy-type/natural_gas\x22>Next</a>");
+                        response = response.replace("href=\x22\x22>Prev</a>", "href=\x22/energy-type/renewable\x22>Prev</a>");
+                    } 
+                    else if (energyTypeSelected == 'renewable') 
+                    {
+                        response = response.replace("href=\x22\x22>Prev</a>", "href=\x22/energy-type/petroleum\x22>Prev</a>");
+                        response = response.replace("href=\x22\x22>Next</a>", "href=\x22/energy-type/coal\x22>Next</a>");
+            
+                    } 
+                    else 
+                    {
+                        var keysArr = [];
+                        var k = 0;
+                        for(var keys in rows)
+                        {
+                            keysArr.push(keys);
+                        }
+                        
+                        while(energyTypeSelected != keysArr[k])
+                        {
+                            k++;
+                        }
+                        console.log(keysArr[k+1]);
+                        response = response.replace("href=\x22\x22>Prev</a>", "href=\x22/energy-type/" + keysArr[k+1] +"\x22>Prev</a>");
+                        response = response.replace("href=\x22\x22>Next</a>", "href=\x22/energy-type/" + keysArr[k+1] +"\x22>Next</a>");
+                    }
+                    WriteHtml(res, response);    
+                });
+                //WriteHtml(res, response);
 			});		         
         })    
     }).catch((err) => {
