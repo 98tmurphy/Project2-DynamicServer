@@ -157,7 +157,7 @@ app.get('/year/:selected_year', (req, res) => {
                     petroleumData = petroleumData.toString();
                     renewableData = rows[i].renewable;
                     renewableData = renewableData.toString();
-                    var totalRowValue = Math.round(coalData + gasData + nuclearData + petroleumData + renewableData);
+                    var totalRowValue = rows[i].coal + rows[i].natural_gas + rows[i].nuclear + rows[i].petroleum + rows[i].renewable;
                     totalRow = totalRowValue.toString();
 
                     tableResult = tableResult + '<tr><td>' + rows[i].state_abbreviation + '</td>' + '\n' + '<td>' + coalData + '</td>' +
