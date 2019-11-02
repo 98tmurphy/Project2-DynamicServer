@@ -354,7 +354,7 @@ app.get('/energy-type/:selected_energy_type', (req, res) => {
                     energyObj[stateKey] = energyValue;
                 }
                 energyObj = JSON.stringify(energyObj);
-                console.log(energyObj);
+                //console.log(energyObj);
                 response = response.replace('var energy_counts', 'var energy_counts = ' + energyObj);
 
                 //db.all('SELECT * FROM Consumption ORDER by state_abbreviation, year', (err, rows) => {
@@ -364,7 +364,7 @@ app.get('/energy-type/:selected_energy_type', (req, res) => {
                     i = 0;
                     let j = 0;
                     while (i < rows.length - 2900) {
-                        console.log(rows[i].year);
+                        //console.log(rows[i].year);
                         dataResult += '<tr><td>' + rows[i].year + '</td>';
                         j = i;
                         let counter = 0;
@@ -394,10 +394,15 @@ app.get('/energy-type/:selected_energy_type', (req, res) => {
                             while (energyTypeSelected != keysArr[k]) {
                                 k++;
                             }
-                            console.log(keysArr[k + 1]);
+                            //console.log(keysArr[k + 1]);
                             response = response.replace('href=\x22\x22>Prev</a>', 'href=\x22/energy-type/' + keysArr[k + 1] + '\x22>Prev</a>');
                             response = response.replace('href=\x22\x22>Next</a>', 'href=\x22/energy-type/' + keysArr[k + 1] + '\x22>Next</a>');
                         }
+
+                        //images
+                        response = response.replace('<img src="/images/noimage.jpg" alt="No Image" width="250" height="auto" />',
+                                                    '<img src="/images/' +energyTypeSelected+ '.jpg" alt="'+energyTypeSelected+'" width="250" height="300" />')
+
                         WriteHtml(res, response);
                 });
             })
