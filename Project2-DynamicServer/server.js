@@ -309,9 +309,10 @@ app.get('/state/:selected_state', async (req, res) => {
 });
 
 // GET request handler for '/energy-type/*'
-app.get('/energy-type/:selected_energy_type', async (req, res) => {
-    const template = await ReadFile(path.join(template_dir, 'energy.html'))
-    try{
+app.get('/energy-type/:selected_energy_type', (req, res) => {
+    ReadFile(path.join(template_dir, 'energy.html'))
+        .then(template => {
+
             let response = template;
 
             let energyTypeSelected = '';
@@ -319,7 +320,7 @@ app.get('/energy-type/:selected_energy_type', async (req, res) => {
             energyTypeSelected = energyTypeSelected.toString();
             // modify `response` here
 
-            const [states, consumption, buttons] = await Promise.all([fetchDb('SELECT * FROM Consumption ORDER BY state_abbreviation,year', []), fetchDb('SELECT * FROM Consumption ORDER BY state_abbreviation,year', []), fetchDb('SELECT coal, natural_gas, nuclear, petroleum, renewable FROM Consumption')]);
+            //const [states] = await Promise.all([fetchDb('SELECT * FROM Consumption ORDER BY state_abbreviation,year', [])]);
 
             response = response.replace('var energy_type', 'var energy_type = ' + "'" + energyTypeSelected + "'");
 
@@ -329,22 +330,22 @@ app.get('/energy-type/:selected_energy_type', async (req, res) => {
             // for each state, loop thru all years and get selected coal type
             //object will have name:value PerformanceObserverEntryList, name is state_abbreviation value is array of energytype
 
-            //db.all('SELECT * FROM Consumption ORDER BY state_abbreviation,year', (err, rows) => {
+            db.all('SELECT * FROM Consumption ORDER BY state_abbreviation,year', (err, rows) => {
                 let stateKey = '';
                 let energyObj = {};
 
                 // loop through each state
                 let i = 0;
-                while (i < states.length) {
-                    stateKey = states[i].state_abbreviation;
+                while (i < rows.length) {
+                    stateKey = rows[i].state_abbreviation;
                     const energyValue = [];
                     // loop through energy source from 1960 - 2017
                     let currentState = stateKey;
                     while (currentState === stateKey) {
-                        energyValue.push(consumption[i][energyTypeSelected]);
+                        energyValue.push(rows[i][energyTypeSelected]);
                         i++;
-                        if (i < states.length) {
-                            currentState = states[i].state_abbreviation;
+                        if (i < rows.length) {
+                            currentState = rows[i].state_abbreviation;
                         } else {
                             currentState = '';
                         }
@@ -362,13 +363,13 @@ app.get('/energy-type/:selected_energy_type', async (req, res) => {
                     let totalRow = 0;
                     i = 0;
                     let j = 0;
-                    while (i < states.length - 2900) {
-                        console.log(states[i].year);
-                        dataResult += '<tr><td>' + states[i].year + '</td>';
+                    while (i < rows.length - 2900) {
+                        console.log(rows[i].year);
+                        dataResult += '<tr><td>' + rows[i].year + '</td>';
                         j = i;
                         let counter = 0;
                         while (counter < 51) {
-                            data = consumption[j][energyTypeSelected];
+                            data = rows[j][energyTypeSelected];
                             dataResult += '<td>' + data + '</td>';
                             totalRow += data;
                             j += 58;
@@ -380,7 +381,6 @@ app.get('/energy-type/:selected_energy_type', async (req, res) => {
                     }
                     response = response.replace('<td>dataTable</td>', dataResult);
 
-                    //db.get('SELECT coal, natural_gas, nuclear, petroleum, renewable FROM Consumption', (err, rows) => {
                         if (energyTypeSelected == 'coal') {
                             response = response.replace('href=\x22\x22>Next</a>', 'href=\x22/energy-type/natural_gas\x22>Next</a>');
                             response = response.replace('href=\x22\x22>Prev</a>', 'href=\x22/energy-type/renewable\x22>Prev</a>');
@@ -390,10 +390,6 @@ app.get('/energy-type/:selected_energy_type', async (req, res) => {
                         } else {
                             const keysArr = ['coal', 'natural_gas', 'nuclear', 'petroleum', 'renewable'];
                             let k = 0;
-                            // for (const keys in buttons) {
-                            //     keysArr.push(keys);
-                            //     console.log(buttons);
-                            // }
 
                             while (energyTypeSelected != keysArr[k]) {
                                 k++;
@@ -403,10 +399,11 @@ app.get('/energy-type/:selected_energy_type', async (req, res) => {
                             response = response.replace('href=\x22\x22>Next</a>', 'href=\x22/energy-type/' + keysArr[k + 1] + '\x22>Next</a>');
                         }
                         WriteHtml(res, response);
-    }catch {
-        Write404Error(res);
-    }
-});
+                });
+            })
+                // db.all for populating table
+            .catch(() => Write404Error(res));
+        });
 
 function fetchDb(query, values) {
     return new Promise((resolve, reject) => {
