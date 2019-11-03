@@ -301,6 +301,9 @@ app.get('/state/:selected_state', async (req, res) => {
             response = response.replace('href=\x22\x22>Prev</a>', 'href=\x22/state/' + consumption[j - 1].state_abbreviation + '\x22>Prev</a>');
             response = response.replace('href=\x22\x22>Next</a>', 'href=\x22/state/' + consumption[j + 1].state_abbreviation + '\x22>Next</a>');
         }
+        //images
+        response = response.replace('<img src="/images/noimage.jpg" alt="No Image" width="250" height="auto" />',
+                                    '<img src="/images/' +fullStateName+ '.jpg" alt="'+fullStateName+'" width="250" height="300" />');
 
         WriteHtml(res, response);
     } catch {
