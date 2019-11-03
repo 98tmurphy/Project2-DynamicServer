@@ -3,23 +3,23 @@
     "version": "0.0.0",
     "description": "Dynamic Web Server using Node JS",
     "author": {
-        "name": "",
-        "email": ""
+        "name": "Tom Murphy",
+        "email": "murp4980@stthomas.edu"
     },
     "contributors": [
         {
-            "name": "",
-            "email": ""
+            "name": "Daniel Taufiq",
+            "email": "daniel.taufiq@stthomas.edu"
         },
         {
-            "name": "",
-            "email": ""
+            "name": "Tom Murphy",
+            "email": "murp4980@stthomas.edu"
         }
     ],
     "main": "server.js",
     "repository": {
         "type": "git",
-        "url": ""
+        "url": "https://github.com/98tmurphy/Project2-DynamicServer"
     },
     "dependencies": {
         "express": "^4.17.1",
