@@ -3,17 +3,16 @@
     "version": "0.0.0",
     "description": "Dynamic Web Server using Node JS",
     "author": {
-        "name": "Daniel Taufiq",
-        "email": "daniel.taufiq@stthomas.edu"
+        "name": "Tom Murphy",
+        "email": "murp4980@stthomas.edu"
     },
     "contributors": [
         {
-           "name": "Tom Murphy",
-           "email": "murp4980@stthomas.edu"
+        "name": "Daniel Taufiq",
+        "email": "daniel.taufiq@stthomas.edu"
         },
         {
-            "name": "",
-            "email": ""
+
         }
     ],
     "main": "server.js",
