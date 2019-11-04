@@ -278,7 +278,7 @@ app.get('/state/:selected_state', async (req, res) => {
                 '</td>';
             total_coal.push(consumption[i].coal);
             total_natural_gas.push(consumption[i].natural_gas);
-            total_nuclear_count.push(consumption[i].natural_gas);
+            total_nuclear_count.push(consumption[i].nuclear);
             total_petroleum_count.push(consumption[i].petroleum);
             total_renewable_count.push(consumption[i].renewable);
             i = i + 51;
