@@ -398,7 +398,7 @@ app.get('/energy-type/:selected_energy_type', (req, res) => {
                                 k++;
                             }
                             //console.log(keysArr[k + 1]);
-                            response = response.replace('href=\x22\x22>Prev</a>', 'href=\x22/energy-type/' + keysArr[k + 1] + '\x22>Prev</a>');
+                            response = response.replace('href=\x22\x22>Prev</a>', 'href=\x22/energy-type/' + keysArr[k - 1] + '\x22>Prev</a>');
                             response = response.replace('href=\x22\x22>Next</a>', 'href=\x22/energy-type/' + keysArr[k + 1] + '\x22>Next</a>');
                         }
 
